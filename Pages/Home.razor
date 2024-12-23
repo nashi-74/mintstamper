@@ -1,44 +1,74 @@
 ﻿@page "/"
 @using System.Text.RegularExpressions
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Mintstamper</PageTitle>
 
-<style>
-    .highlight {
-        background-color: yellow;
-    }
-</style>
+<body>
+    <div style="margin-left: 25px;">
+        <br>
+        <p>Paste timestamps here:</p>
+        <textarea @oninput="ProcessTextInput" rows="15" style="width: 1200px;"></textarea>
+        <p>Output:</p>
 
-Paste timestamps here:
-<br><textarea @oninput="ProcessTextInput" rows="15" cols="100"></textarea>
-<br>Output:
-<pre>
-    @foreach (var line in Lines)
-    {
-    <span class="@GetLineClass(lineIndex++)">@line</span><br>
-    }
-    @if (HBDs.Count() > 0)
-    {
-    <br><span>:_Cheer:HBDs:_Cheer:</span>
-        @foreach (var line in HBDs)
-        {
-        <br><span>@line</span>
+        <div class="position-relative" style="background-color: #000000; width: 1200px; border: 2px solid white; border-radius: 2px;">
+            <pre @ref="_codeElement" style="padding: 10px; padding-top: 30px;">
+                @if (Lines.Count > 0)
+                {
+                    <br>
+                }
+                @foreach (var line in Lines)
+                {
+                    <span class="@GetLineClass(lineIndex++)">@line@Environment.NewLine</span>
+                }
+                @if (HBDs.Count() > 0)
+                {
+                    <span>@Environment.NewLine:_Cheer:HBDs:_Cheer:</span>
+                    @foreach (var line in HBDs)
+                    {
+                        <span class="@GetLineClass(Lines.Count + hbdIndex++)">@Environment.NewLine@line</span>
+                    }
+                }
+            </pre>
+            <div style="position:absolute; top: 10px; left: 10px;">
+                <button type="button" @onclick="CopyTextToClipboard">Copy to clipboard</button>
+            </div>
+        </div>
+        <br>
+        @code {
+            private ElementReference _codeElement;
+            [Parameter] public RenderFragment ChildContent { get; set; }
+            private async Task CopyTextToClipboard()
+            {
+                await JSRuntime.InvokeVoidAsync("clipboardCopy.copyText", _codeElement);
+                lineIndex = 0;
+                hbdIndex = 0;
+            }
         }
+    </div>
+<script>
+window.clipboardCopy = {
+    copyText: function (codeElement) {
+        navigator.clipboard.writeText(codeElement.textContent)
+        .catch(function (error) {
+            alert(error);
+        });
     }
-</pre>
+}
+</script>
+</body>
 
 
 
 @code {
     private string inputText { get; set; } = string.Empty;
-
     private List<string> Lines { get; set; } = new List<string>();
-
     private List<string> HBDs { get; set; } = new List<string>();
-
-    private List<int> highlightedLines { get; set; } = new List<int>();
-
+    private List<int> stackedLines { get; set; } = new List<int>();
+    private List<int> noteLines { get; set; } = new List<int>();
+    private List<int> controlLines { get; set; } = new List<int>();
     private int lineIndex { get; set; } = 0;
+    private int hbdIndex { get; set; } = 0;
 
     private List<string> replacements = new List<string>
         {
@@ -207,8 +237,8 @@ Paste timestamps here:
                 inputText = inputText.Replace(":memboo", ":_"); //emotes
                 inputText = inputText.Replace("#", "# "); //hashtags
 
-                inputText = Regex.Replace(inputText, @"w{3,}", "ww"); //wwwwww
-                inputText = Regex.Replace(inputText, @"W{3,}", "WW"); //WWWWWW
+                inputText = Regex.Replace(inputText, @"w{3,}", "ww"); //wwwwwws
+                inputText = Regex.Replace(inputText, @"W{3,}", "WW"); //WWWWWWs
 
                 //profanity filter
                 foreach (string replacement in replacements)
@@ -219,15 +249,41 @@ Paste timestamps here:
 
                 Lines = inputText.Split("\n").ToList();
                 HBDs.Clear();
-                highlightedLines.Clear();
+                stackedLines.Clear();
+                noteLines.Clear();
+                controlLines.Clear();
 
-                //separating out HBDs
+                //separating out HBDs, highlighting control lines and notes
                 for (int i = Lines.Count - 1; i >= 0; i--)
                 {
                     if (Lines[i].ToLower().Contains("hbd"))
                     {
                         HBDs.Insert(0, Lines[i]);
                         Lines.RemoveAt(i);
+                    }
+                }
+
+                for (int i = 0; i < Lines.Count; i++)
+                {
+                    if (Lines[i].ToLower().Contains("note: "))
+                    {
+                        noteLines.Add(i);
+                    }
+                    else if (Lines[i].ToLower().Contains("control stamp") || Lines[i].ToLower().Contains("control tag") || Lines[i].ToLower().Contains("control timestamp"))
+                    {
+                        controlLines.Add(i);
+                    }
+                }
+
+                for (int i = 0; i < HBDs.Count; i++)
+                {
+                    if (HBDs[i].ToLower().Contains("note: "))
+                    {
+                        noteLines.Add(Lines.Count + i);
+                    }
+                    else if (HBDs[i].ToLower().Contains("control stamp") || HBDs[i].ToLower().Contains("control tag") || HBDs[i].ToLower().Contains("control timestamp"))
+                    {
+                        controlLines.Add(Lines.Count + i);
                     }
                 }
 
@@ -245,25 +301,34 @@ Paste timestamps here:
                                             3600 * (Timestamp.Length == 3 ? Convert.ToInt32(Timestamp[Timestamp.Length - 3]) : 0);
                     if (TimestampSeconds - previousTimestampSeconds < 40)
                     {
-                        highlightedLines.Add(previousIndex);
-                        highlightedLines.Add(i);
+                        stackedLines.Add(previousIndex);
+                        stackedLines.Add(i);
                     }
                     previousIndex = i;
                     previousTimestampSeconds = TimestampSeconds;
                 }
-                lineIndex = 0; //this line restarts output line rendering
+                lineIndex = 0; //these lines restart output line rendering to properly do highlights
+                hbdIndex = 0;
             }
             catch (Exception ex)
             {
                 //exceptions will usually happen due to a bad timestamp format, i'm too lazy to properly verify it, just use the bot outputs and we'll all be fine
             }
         }
+        else
+        {
+            Lines.Clear();
+            HBDs.Clear();
+        }
 
     }
 
     private string GetLineClass(int index)
     {
-        return highlightedLines.Contains(index) ? "highlight" : string.Empty;
+        if (controlLines.Contains(index)) return "highlightcontrol";
+        else if (noteLines.Contains(index)) return "highlightnote";
+        else if (stackedLines.Contains(index)) return "highlightstack";
+        else return string.Empty;
     }
 
     private static string CensorWord(string word)
