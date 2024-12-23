@@ -5,10 +5,12 @@ Current features:
 -Filtering profanities  
 -HBD separation  
 -Crowded tag highlights  
+-Note and control stamp highlights  
+-Copy to clipboard  
   
 Planned features (I'll eventually get around to adding them):  
 -Global stamp offsets  
 -Comment separation based on the total character count  
 -Optional automatic break insertion  
-
+  
 Website icon by https://x.com/irlgojira, thank you so much!
