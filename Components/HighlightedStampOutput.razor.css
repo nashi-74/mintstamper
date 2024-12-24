@@ -1,0 +1,34 @@
+.highlightstack {
+    background-color: yellow;
+    color: black;
+}
+
+.highlightnote {
+    background-color: darkturquoise;
+    color: black;
+}
+
+.highlightcontrol {
+    background-color: darkorange;
+    color: black;
+}
+
+#copy-box {
+    background-color: black;
+    border: 2px solid white;
+    border-radius: 2px;
+    padding: 1em;
+}
+
+button {
+    padding: 4px 8px;
+    background-color: #222222;
+    color: white;
+    border: 2px solid white;
+    border-radius: 2px;
+    margin-bottom: 0.5em;
+}
+
+button:hover {
+    background-color: #666666;
+}

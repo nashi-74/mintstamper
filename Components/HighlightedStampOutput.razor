@@ -1,0 +1,43 @@
+﻿@inject IJSRuntime JSRuntime
+
+<div>
+    <h5>Output:</h5>
+    <div id="copy-box">
+        <button type="button" @onclick="CopyTextToClipboard">Copy to clipboard</button>
+        <pre @ref="_codeElement">
+            @foreach (var stamp in Stamps.Where(s => !s.IsBirthday))
+            {
+                <span class="@GetLineClass(stamp)">@stamp.Text@Environment.NewLine</span>
+            }
+            @if (_hbds.Any())
+            {
+                <span>@Environment.NewLine:_Cheer:HBDs:_Cheer:</span>
+                @foreach (var stamp in _hbds)
+                {
+                    <span class="@GetLineClass(stamp)">@Environment.NewLine@stamp.Text</span>
+                }
+            }
+        </pre>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public List<Stamp> Stamps { get; set; } = [];
+
+    private ElementReference _codeElement;
+    private IEnumerable<Stamp> _hbds => Stamps.Where(s => s.IsBirthday);
+
+    private string GetLineClass(Stamp stamp) => stamp.StampType switch
+    {
+        StampTypeEnum.Control => "highlightcontrol",
+        StampTypeEnum.Note => "highlightnote",
+        StampTypeEnum.Stacked => "highlightstack",
+        _ => string.Empty
+    };
+
+    private async Task CopyTextToClipboard()
+    {
+        await JSRuntime.InvokeVoidAsync("clipboardCopy", _codeElement);
+    }
+}
