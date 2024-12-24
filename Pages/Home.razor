@@ -1,74 +1,16 @@
 ﻿@page "/"
 @using System.Text.RegularExpressions
-@inject IJSRuntime JSRuntime
+@inject ICensorService censorService
+@inject IStampParserService stampParserService
 
 <PageTitle>Mintstamper</PageTitle>
 
-<body>
-    <div style="margin-left: 25px;">
-        <br>
-        <p>Paste timestamps here:</p>
-        <textarea @oninput="ProcessTextInput" rows="15" style="width: 1200px;"></textarea>
-        <p>Output:</p>
-
-        <div class="position-relative" style="background-color: #000000; width: 1200px; border: 2px solid white; border-radius: 2px;">
-            <pre @ref="_codeElement" style="padding: 10px; padding-top: 30px;">
-                @if (Lines.Count > 0)
-                {
-                    <br>
-                }
-                @foreach (var line in Lines)
-                {
-                    <span class="@GetLineClass(lineIndex++)">@line@Environment.NewLine</span>
-                }
-                @if (HBDs.Count() > 0)
-                {
-                    <span>@Environment.NewLine:_Cheer:HBDs:_Cheer:</span>
-                    @foreach (var line in HBDs)
-                    {
-                        <span class="@GetLineClass(Lines.Count + hbdIndex++)">@Environment.NewLine@line</span>
-                    }
-                }
-            </pre>
-            <div style="position:absolute; top: 10px; left: 10px;">
-                <button type="button" @onclick="CopyTextToClipboard">Copy to clipboard</button>
-            </div>
-        </div>
-        <br>
-        @code {
-            private ElementReference _codeElement;
-            [Parameter] public RenderFragment ChildContent { get; set; }
-            private async Task CopyTextToClipboard()
-            {
-                await JSRuntime.InvokeVoidAsync("clipboardCopy.copyText", _codeElement);
-                lineIndex = 0;
-                hbdIndex = 0;
-            }
-        }
-    </div>
-<script>
-window.clipboardCopy = {
-    copyText: function (codeElement) {
-        navigator.clipboard.writeText(codeElement.textContent)
-        .catch(function (error) {
-            alert(error);
-        });
-    }
-}
-</script>
-</body>
-
-
+<StampInput @bind-ChildData=inputText @bind-ChildData:after=ProcessTextInput />
+<HighlightedStampOutput Stamps=stamps />
 
 @code {
     private string inputText { get; set; } = string.Empty;
-    private List<string> Lines { get; set; } = new List<string>();
-    private List<string> HBDs { get; set; } = new List<string>();
-    private List<int> stackedLines { get; set; } = new List<int>();
-    private List<int> noteLines { get; set; } = new List<int>();
-    private List<int> controlLines { get; set; } = new List<int>();
-    private int lineIndex { get; set; } = 0;
-    private int hbdIndex { get; set; } = 0;
+    private List<Stamp> stamps { get; set; } = [];
 
     private List<string> replacements = new List<string>
         {
@@ -226,122 +168,19 @@ window.clipboardCopy = {
             #endregion
         };
 
-    private void ProcessTextInput(ChangeEventArgs e)
+    private void ProcessTextInput()
     {
-        inputText = e.Value?.ToString() ?? string.Empty;
+        inputText = inputText.Replace(":memboo", ":_"); //emotes
+        inputText = inputText.Replace("#", "# "); //hashtags
 
-        if (inputText != "")
-        {
-            try
-            {
-                inputText = inputText.Replace(":memboo", ":_"); //emotes
-                inputText = inputText.Replace("#", "# "); //hashtags
+        inputText = Regex.Replace(inputText, @"w{3,}", "ww"); //wwwwwws
+        inputText = Regex.Replace(inputText, @"W{3,}", "WW"); //WWWWWWs
 
-                inputText = Regex.Replace(inputText, @"w{3,}", "ww"); //wwwwwws
-                inputText = Regex.Replace(inputText, @"W{3,}", "WW"); //WWWWWWs
+        //profanity filter,
+        //passing in list as reference because I don't want that list to appear in my pushed / removed lines of code lol
+        inputText = censorService.CensorText(inputText, replacements);
 
-                //profanity filter
-                foreach (string replacement in replacements)
-                {
-                    string pattern = $@"\b{Regex.Escape(replacement)}\b";
-                    inputText = Regex.Replace(inputText, pattern, match => CensorWord(match.Value), RegexOptions.IgnoreCase);
-                }
-
-                Lines = inputText.Split("\n").ToList();
-                HBDs.Clear();
-                stackedLines.Clear();
-                noteLines.Clear();
-                controlLines.Clear();
-
-                //separating out HBDs, highlighting control lines and notes
-                for (int i = Lines.Count - 1; i >= 0; i--)
-                {
-                    if (Lines[i].ToLower().Contains("hbd"))
-                    {
-                        HBDs.Insert(0, Lines[i]);
-                        Lines.RemoveAt(i);
-                    }
-                }
-
-                for (int i = 0; i < Lines.Count; i++)
-                {
-                    if (Lines[i].ToLower().Contains("note: "))
-                    {
-                        noteLines.Add(i);
-                    }
-                    else if (Lines[i].ToLower().Contains("control stamp") || Lines[i].ToLower().Contains("control tag") || Lines[i].ToLower().Contains("control timestamp"))
-                    {
-                        controlLines.Add(i);
-                    }
-                }
-
-                for (int i = 0; i < HBDs.Count; i++)
-                {
-                    if (HBDs[i].ToLower().Contains("note: "))
-                    {
-                        noteLines.Add(Lines.Count + i);
-                    }
-                    else if (HBDs[i].ToLower().Contains("control stamp") || HBDs[i].ToLower().Contains("control tag") || HBDs[i].ToLower().Contains("control timestamp"))
-                    {
-                        controlLines.Add(Lines.Count + i);
-                    }
-                }
-
-                //checking for close timestamps (I went with an arbitrary min separation of 40 seconds)
-                int previousIndex = 0;
-                string[] Timestamp = Lines[0].Substring(0, Lines[0].IndexOf(' ')).Split(":");
-                int previousTimestampSeconds = Convert.ToInt32(Timestamp[Timestamp.Length - 1]) +
-                                            60 * Convert.ToInt32(Timestamp[Timestamp.Length - 2]) +
-                                            3600 * (Timestamp.Length == 3 ? Convert.ToInt32(Timestamp[Timestamp.Length - 3]) : 0);
-                for (int i = 1; i < Lines.Count(); i++)
-                {
-                    Timestamp = Lines[i].Substring(0, Lines[i].IndexOf(' ')).Split(":");
-                    int TimestampSeconds = Convert.ToInt32(Timestamp[Timestamp.Length - 1]) +
-                                            60 * Convert.ToInt32(Timestamp[Timestamp.Length - 2]) +
-                                            3600 * (Timestamp.Length == 3 ? Convert.ToInt32(Timestamp[Timestamp.Length - 3]) : 0);
-                    if (TimestampSeconds - previousTimestampSeconds < 40)
-                    {
-                        stackedLines.Add(previousIndex);
-                        stackedLines.Add(i);
-                    }
-                    previousIndex = i;
-                    previousTimestampSeconds = TimestampSeconds;
-                }
-                lineIndex = 0; //these lines restart output line rendering to properly do highlights
-                hbdIndex = 0;
-            }
-            catch (Exception ex)
-            {
-                //exceptions will usually happen due to a bad timestamp format, i'm too lazy to properly verify it, just use the bot outputs and we'll all be fine
-            }
-        }
-        else
-        {
-            Lines.Clear();
-            HBDs.Clear();
-        }
-
-    }
-
-    private string GetLineClass(int index)
-    {
-        if (controlLines.Contains(index)) return "highlightcontrol";
-        else if (noteLines.Contains(index)) return "highlightnote";
-        else if (stackedLines.Contains(index)) return "highlightstack";
-        else return string.Empty;
-    }
-
-    private static string CensorWord(string word)
-    {
-        foreach (char c in word)
-        {
-            if ("aeiouAEIOU".IndexOf(c) >= 0)
-            {
-                int censorIndex = word.IndexOf(c);
-                return word.Remove(censorIndex, 1).Insert(censorIndex, "*");
-            }
-        }
-
-        return word.Remove(0, 1).Insert(0, "*");
+        //separating out HBDs, highlighting control lines and notes
+        stamps = stampParserService.ParseStamps(inputText);
     }
 }
