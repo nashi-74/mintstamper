@@ -16,7 +16,7 @@ public class StampParserService : IStampParserService
 
         for (int i = 1; i < stamps.Count; i++)
         {
-            if (stamps[i].TimestampSeconds - stamps[i - 1].TimestampSeconds <= 40)
+            if (stamps[i].TimestampSeconds - stamps[i - 1].TimestampSeconds <= 40 && !(stamps[i - 1].IsBirthday || stamps[i].IsBirthday))
             {
                 if (stamps[i - 1].StampType == StampTypeEnum.Regular) stamps[i - 1] = stamps[i - 1] with { StampType = StampTypeEnum.Stacked };
                 if (stamps[i].StampType == StampTypeEnum.Regular) stamps[i] = stamps[i] with { StampType = StampTypeEnum.Stacked };
