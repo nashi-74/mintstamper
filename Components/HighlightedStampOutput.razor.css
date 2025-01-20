@@ -16,7 +16,7 @@
 #copy-box {
     background-color: black;
     border: 2px solid white;
-    border-radius: 2px;
+    border-radius: 4px;
     padding: 1em;
 }
 
@@ -25,7 +25,7 @@ button {
     background-color: #222222;
     color: white;
     border: 2px solid white;
-    border-radius: 2px;
+    border-radius: 4px;
     margin-bottom: 0.5em;
 }
 

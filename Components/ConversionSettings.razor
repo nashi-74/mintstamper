@@ -1,0 +1,86 @@
+﻿@using System.Text.Json;
+@using mintstamper.Models;
+
+<div>
+    <h5>Conversion settings</h5>
+    <div class="container">
+        <div class="form-group">
+            <label for="textbox">Emote string:</label>
+            <input type="text" id="emoteTextbox" name="emoteTextbox" value="@EmoteString" @oninput="OnEmoteStringChanged" />
+        </div>
+        <div class="form-group">
+            <input type="checkbox" name="checkbox1" value="@BreakBool" @onchange="OnBreakBoolChanged" />
+            <label for="checkbox1">Add breaks every</label>
+            <input type="text" id="breakTextbox" name="breakTextbox" @bind="BreakString" @bind:event="oninput" />
+            <label for="checkbox1">minutes</label>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    //emote string textbox
+    [Parameter]
+    public string ?EmoteString { get; set; } = "memboo";
+
+    [Parameter]
+    public EventCallback<string> EmoteStringChangedEvent { get; set; }
+
+    private async Task OnEmoteStringChanged(ChangeEventArgs e)
+    {
+        EmoteString = e.Value?.ToString();
+        await EmoteStringChangedEvent.InvokeAsync(EmoteString);
+    }
+
+    //break interval textbox
+    private string _breakString = "60";
+    public string? BreakString
+    {
+        get => _breakString;
+        set
+        {
+            _breakString = ValidateBreakString(value ?? "1");
+            _ = OnBreakStringChangedAsync();
+        }
+    }
+
+    private async Task OnBreakStringChangedAsync()
+    {
+        await BreakSettingsChanged();
+    }
+
+    private string ValidateBreakString(string newLengthString)
+    {
+        foreach (char c in newLengthString)
+        {
+            if (!char.IsDigit(c))
+            {
+                newLengthString = newLengthString.Remove(newLengthString.IndexOf(c), 1);
+            }
+        }
+        if (newLengthString.Length > 3)
+        {
+            newLengthString = BreakString ?? "1";
+        }
+        return newLengthString;
+    }
+
+    //break checkbox
+    public bool BreakBool { get; set; }
+    private async Task OnBreakBoolChanged(ChangeEventArgs e)
+    {
+        BreakBool = Convert.ToBoolean(e.Value);
+        await BreakSettingsChanged();
+    }
+
+    //here the break settings get passed to Home.razor
+    [Parameter]
+    public EventCallback<string> BreakSettingsChangedEvent { get; set; }
+    private async Task BreakSettingsChanged()
+    {
+        BreakSettings settings = new BreakSettings(string.IsNullOrEmpty(BreakString) ? "1" : BreakString, BreakBool);
+        string serializedSettings = JsonSerializer.Serialize<BreakSettings>(settings);
+        await BreakSettingsChangedEvent.InvokeAsync(serializedSettings);
+    }
+
+}

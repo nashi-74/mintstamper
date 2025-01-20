@@ -1,12 +1,22 @@
-﻿@inject IJSRuntime JSRuntime
+﻿@using mintstamper.Models;
+@inject IJSRuntime JSRuntime
 
 <div>
     <h5>Output:</h5>
     <div id="copy-box">
         <button type="button" @onclick="CopyTextToClipboard">Copy to clipboard</button>
         <pre @ref="_codeElement">
+            @{ int counter = 1;}
             @foreach (var stamp in Stamps.Where(s => !s.IsBirthday))
             {
+                @if (BreakSettings.Enabled)
+                {
+                    if ((double)stamp.TimestampSeconds / 60 > Convert.ToDouble(BreakSettings.Interval) * counter)
+                    {
+                        counter++;
+                        <span>@Environment.NewLine</span>
+                    }
+                }
                 <span class="@GetLineClass(stamp)">@stamp.Text@Environment.NewLine</span>
             }
             @if (_hbds.Any())
@@ -24,6 +34,9 @@
 @code {
     [Parameter]
     public List<Stamp> Stamps { get; set; } = [];
+
+    [Parameter]
+    public BreakSettings BreakSettings { get; set; } = new BreakSettings("60", false);
 
     private ElementReference _codeElement;
     private IEnumerable<Stamp> _hbds => Stamps.Where(s => s.IsBirthday);

@@ -1,15 +1,25 @@
-﻿@page "/"
+﻿@page "/{emotestring?}"
 @using System.Text.RegularExpressions
+@using System.Text.Json;
+@using mintstamper.Models;
 @inject ICensorService censorService
 @inject IStampParserService stampParserService
 
 <PageTitle>Mintstamper</PageTitle>
 
 <StampInput @bind-ChildData=inputText @bind-ChildData:after=ProcessTextInput />
-<HighlightedStampOutput Stamps=stamps />
+<ConversionSettings EmoteString="@EmoteString" EmoteStringChangedEvent="UpdateEmoteString" BreakSettingsChangedEvent="UpdateBreakSettings" />
+<HighlightedStampOutput Stamps=stamps BreakSettings="BreakSettings" />
 
 @code {
+    [Parameter]
+    public string? EmoteString { get; set; } //value received from the url
+    private string emoteString => string.IsNullOrEmpty(EmoteString) ? "memboo" : EmoteString; //verified and bound to the ConversionSettings textbox
+
+    public BreakSettings BreakSettings { get; set; } = new BreakSettings("60", false);
+
     private string inputText { get; set; } = string.Empty;
+    private string outputText { get; set; } = string.Empty;
     private List<Stamp> stamps { get; set; } = [];
 
     private List<string> replacements = new List<string>
@@ -235,6 +245,9 @@
             "terrorism",
             "terrorist",
             "terrorists",
+            "tiktok",
+            "tiktoker",
+            "tiktoks",
             "tit",
             "tits",
             "tittie",
@@ -261,17 +274,29 @@
 
     private void ProcessTextInput()
     {
-        inputText = inputText.Replace(":memboo", ":_"); //emotes
-        inputText = inputText.Replace("#", "# "); //hashtags
+        outputText = inputText.Replace((string.IsNullOrEmpty(emoteString) ? ":memboo" : ":" + emoteString), ":_"); //emotes
+        outputText = outputText.Replace("#", "# "); //hashtags
 
-        inputText = Regex.Replace(inputText, @"w{3,}", "ww"); //wwwwwws
-        inputText = Regex.Replace(inputText, @"W{3,}", "WW"); //WWWWWWs
+        outputText = Regex.Replace(outputText, @"w{3,}", "ww"); //wwwwwws
+        outputText = Regex.Replace(outputText, @"W{3,}", "WW"); //WWWWWWs
 
         //profanity filter,
         //passing in list as reference because I don't want that list to appear in my pushed / removed lines of code lol
-        inputText = censorService.CensorText(inputText, replacements);
+        outputText = censorService.CensorText(outputText, replacements);
 
         //separating out HBDs, highlighting control lines and notes
-        stamps = stampParserService.ParseStamps(inputText);
+        stamps = stampParserService.ParseStamps(outputText);
+    }
+
+    //set EmoteString if no parameter received by url
+    protected override void OnInitialized() { if (string.IsNullOrEmpty(EmoteString)) EmoteString = "memboo"; }
+
+    //called by event in ConversionSettings upon modifying the textbox content
+    private void UpdateEmoteString(string newEmoteString) { EmoteString = newEmoteString; ProcessTextInput(); }
+
+    //called whenever the break checkbox state is changed or a new break length value is set
+    private void UpdateBreakSettings(string serializedSettings) {
+        BreakSettings = JsonSerializer.Deserialize<BreakSettings>(serializedSettings) ?? new BreakSettings("60", false);
+        if (BreakSettings.Enabled) ProcessTextInput();
     }
 }

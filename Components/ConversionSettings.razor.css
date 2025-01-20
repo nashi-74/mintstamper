@@ -1,0 +1,39 @@
+﻿.container {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: flex-start;
+    max-width: 100%;
+    padding-left: 0px;
+    margin-left: 0px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+}
+
+label {
+    white-space: nowrap;
+}
+
+input[type="text"] {
+    height: 35px;
+    padding: 8px;
+    border: 1px solid white;
+    border-radius: 4px;
+    font-size: 18px;
+    background-color: black;
+    color: white;
+}
+
+#emoteTextbox {
+    width: 180px;
+}
+
+#breakTextbox {
+    width: 50px;
+    text-align: center;
+}
