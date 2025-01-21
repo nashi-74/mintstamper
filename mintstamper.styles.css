@@ -1,3 +1,43 @@
+/* /Components/ConversionSettings.razor.rz.scp.css */
+.container[b-zhjsojauc3] {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: flex-start;
+    max-width: 100%;
+    padding-left: 0px;
+    margin-left: 0px;
+}
+
+.form-group[b-zhjsojauc3] {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+}
+
+label[b-zhjsojauc3] {
+    white-space: nowrap;
+}
+
+input[type="text"][b-zhjsojauc3] {
+    height: 35px;
+    padding: 8px;
+    border: 1px solid white;
+    border-radius: 4px;
+    font-size: 18px;
+    background-color: black;
+    color: white;
+}
+
+#emoteTextbox[b-zhjsojauc3] {
+    width: 180px;
+}
+
+#breakTextbox[b-zhjsojauc3] {
+    width: 50px;
+    text-align: center;
+}
 /* /Components/HighlightedStampOutput.razor.rz.scp.css */
 .highlightstack[b-4ai3qvwlud] {
     background-color: yellow;
@@ -17,7 +57,7 @@
 #copy-box[b-4ai3qvwlud] {
     background-color: black;
     border: 2px solid white;
-    border-radius: 2px;
+    border-radius: 4px;
     padding: 1em;
 }
 
@@ -26,7 +66,7 @@ button[b-4ai3qvwlud] {
     background-color: #222222;
     color: white;
     border: 2px solid white;
-    border-radius: 2px;
+    border-radius: 4px;
     margin-bottom: 0.5em;
 }
 
@@ -39,7 +79,7 @@ textarea[b-1axanovbp4] {
     background-color: black;
 
     border: 2px solid white;
-    border-radius: 2px;
+    border-radius: 4px;
     width: 100%;
 }
 /* /Layout/MainLayout.razor.rz.scp.css */
