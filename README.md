@@ -1,4 +1,4 @@
-A simple timestamp processing app for use with the Mintcord timestamp bot outputs  
+A simple timestamp processing app for use with korotagger outputs  
   
 Current features:  
 -Emote parsing  
@@ -7,10 +7,12 @@ Current features:
 -Crowded tag highlights  
 -Note and control stamp highlights  
 -Copy to clipboard  
+-Custom emote string handling with the possibility of setting the emote string via the url  
+-Optional automatic break insertion  
   
-Planned features (I'll eventually get around to adding them):  
+TODO (I'll eventually get around to it):  
+-A somewhat decent manual  
 -Global stamp offsets  
 -Comment separation based on the total character count  
--Optional automatic break insertion  
   
 Website icon by https://x.com/irlgojira, thank you so much!
