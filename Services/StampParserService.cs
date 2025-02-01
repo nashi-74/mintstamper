@@ -41,7 +41,9 @@ public class StampParserService : IStampParserService
 
             var lineType = StampTypeEnum.Regular;
             if (lineLower.Contains("note: ")) lineType = StampTypeEnum.Note;
-            if (lineLower.Contains("control stamp") || lineLower.Contains("control tag") || lineLower.Contains("control timestamp")) lineType = StampTypeEnum.Control;
+            if (lineLower.Contains("control stamp") || lineLower.Contains("control tag") || lineLower.Contains("control timestamp") || 
+                lineLower.Contains("anshor stamp") || lineLower.Contains("anchor tag") || lineLower.Contains("anchor timestamp")) lineType = StampTypeEnum.Control;
+            if (lineLower.Contains("adjust") || lineLower.Contains("retime")) lineType = StampTypeEnum.Adjust;
 
             return new(
                 Text: line,

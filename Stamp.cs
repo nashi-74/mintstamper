@@ -5,7 +5,8 @@ public enum StampTypeEnum
     Regular,
     Control,
     Note,
-    Stacked
+    Stacked,
+    Adjust
 }
 
 public record Stamp
