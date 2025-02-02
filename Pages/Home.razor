@@ -274,17 +274,18 @@
 
     private void ProcessTextInput()
     {
-        outputText = inputText.Replace((string.IsNullOrEmpty(emoteString) ? ":memboo" : ":" + emoteString), ":_"); //emotes
-        outputText = outputText.Replace("#", "# "); //hashtags
+        outputText = Regex.Replace(inputText, @":([a-zA-Z]+)~\d+:", @":$1:"); //removing server suffixes from emotes (:emote~number: -> :emote:)
+        outputText = outputText.Replace((string.IsNullOrEmpty(emoteString) ? ":memboo" : ":" + emoteString), ":_"); //replacing the emote strings
+        outputText = outputText.Replace("#", "# "); //fixing hashtags
 
-        outputText = Regex.Replace(outputText, @"w{3,}", "ww"); //wwwwwws
-        outputText = Regex.Replace(outputText, @"W{3,}", "WW"); //WWWWWWs
 
-        //profanity filter,
-        //passing in list as reference because I don't want that list to appear in my pushed / removed lines of code lol
+        outputText = Regex.Replace(outputText, @"w{3,}", "ww"); //trimming wwwwwws
+        outputText = Regex.Replace(outputText, @"W{3,}", "WW"); //trimming WWWWWWs
+
+        //profanity filter
         outputText = censorService.CensorText(outputText, replacements);
 
-        //separating out HBDs, highlighting control lines and notes
+        //separating out HBDs, highlighting lines
         stamps = stampParserService.ParseStamps(outputText);
     }
 
