@@ -6,13 +6,16 @@ public enum StampTypeEnum
     Control,
     Note,
     Stacked,
-    Adjust
+    Adjust,
+    ContentFilter
 }
 
 public record Stamp
 (
     string Text,
+    List<(string text, StampTypeEnum segmentType)> Segments,
     StampTypeEnum StampType,
     bool IsBirthday,
     int TimestampSeconds
 );
+

@@ -17,7 +17,18 @@
                         <span>@Environment.NewLine</span>
                     }
                 }
-                <span class="@GetLineClass(stamp)">@stamp.Text@Environment.NewLine</span>
+                @if (stamp.Segments.Count == 0)
+                {
+                    <span class="@GetLineClass(stamp)">@stamp.Text@Environment.NewLine</span>
+                }
+                else
+                {
+                    @foreach ((string text, StampTypeEnum segmentType) segment in stamp.Segments)
+                    {
+                        <span class="@GetLineClass(segment.segmentType)">@segment.text</span>
+                    }
+                    @Environment.NewLine
+                }
             }
             @if (_hbds.Any())
             {
@@ -26,6 +37,7 @@
                 {
                     <span class="@GetLineClass(stamp)">@Environment.NewLine@stamp.Text</span>
                 }
+                @Environment.NewLine
             }
         </pre>
     </div>
@@ -47,6 +59,16 @@
         StampTypeEnum.Note => "highlightnote",
         StampTypeEnum.Stacked => "highlightstack",
         StampTypeEnum.Adjust => "highlightadjust",
+        _ => string.Empty
+    };
+
+    private string GetLineClass(StampTypeEnum segmentType) => segmentType switch
+    {
+        StampTypeEnum.Control => "highlightcontrol",
+        StampTypeEnum.Note => "highlightnote",
+        StampTypeEnum.Stacked => "highlightstack",
+        StampTypeEnum.Adjust => "highlightadjust",
+        StampTypeEnum.ContentFilter => "highlightcontentfilter",
         _ => string.Empty
     };
 

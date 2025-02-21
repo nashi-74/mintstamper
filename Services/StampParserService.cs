@@ -47,6 +47,7 @@ public class StampParserService : IStampParserService
 
             return new(
                 Text: line,
+                Segments: [],
                 StampType: lineType,
                 IsBirthday: lineLower.Contains("hbd"),
                 TimestampSeconds: timestampSeconds
@@ -54,7 +55,7 @@ public class StampParserService : IStampParserService
         }
         catch
         {
-            return new("ERROR PARSING LINE", StampTypeEnum.Note, false, 0);
+            return new("ERROR PARSING LINE", [], StampTypeEnum.Note, false, 0);
         }
     }
 }

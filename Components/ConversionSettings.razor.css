@@ -29,6 +29,16 @@ input[type="text"] {
     color: white;
 }
 
+select {
+    height: 35px;
+    padding-left: 4px;
+    border: 1px solid white;
+    border-radius: 4px;
+    font-size: 18px;
+    background-color: black;
+    color: white;
+}
+
 #emoteTextbox {
     width: 180px;
 }
