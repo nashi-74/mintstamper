@@ -1,12 +1,14 @@
 /* /Components/ConversionSettings.razor.rz.scp.css */
 .container[b-zhjsojauc3] {
     display: flex;
-    gap: 20px;
-    align-items: center;
+    gap: 10px;
+    align-items: flex-start;
     justify-content: flex-start;
+    flex-direction: column;
     max-width: 100%;
-    padding-left: 0px;
+    padding-left: 15px;
     margin-left: 0px;
+    font-size: 18px;
 }
 
 .form-group[b-zhjsojauc3] {
@@ -30,11 +32,26 @@ input[type="text"][b-zhjsojauc3] {
     color: white;
 }
 
+select[b-zhjsojauc3] {
+    height: 35px;
+    padding-left: 4px;
+    border: 1px solid white;
+    border-radius: 4px;
+    font-size: 18px;
+    background-color: black;
+    color: white;
+}
+
 #emoteTextbox[b-zhjsojauc3] {
     width: 180px;
 }
 
 #breakTextbox[b-zhjsojauc3] {
+    width: 50px;
+    text-align: center;
+}
+
+#stackTextbox[b-zhjsojauc3] {
     width: 50px;
     text-align: center;
 }
@@ -55,8 +72,13 @@ input[type="text"][b-zhjsojauc3] {
 }
 
 .highlightadjust[b-4ai3qvwlud] {
-    background-color: red;
+    background-color: limegreen;
     color: black;
+}
+
+.highlightcontentfilter[b-4ai3qvwlud] {
+    background-color: red;
+    color: white;
 }
 
 #copy-box[b-4ai3qvwlud] {
