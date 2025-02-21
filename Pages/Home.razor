@@ -8,7 +8,7 @@
 <PageTitle>Mintstamper</PageTitle>
 
 <StampInput @bind-ChildData=inputText @bind-ChildData:after=ProcessTextInput />
-<ConversionSettings EmoteString="@EmoteString" EmoteStringChangedEvent="UpdateEmoteString" CensorSettingsChangedEvent="UpdateCensorMode" BreakSettingsChangedEvent="UpdateBreakSettings" />
+<ConversionSettings EmoteString="@EmoteString" EmoteStringChangedEvent="UpdateEmoteString" CensorSettingsChangedEvent="UpdateCensorMode" BreakSettingsChangedEvent="UpdateBreakSettings" StackStringChangedEvent="UpdateStackString" />
 <HighlightedStampOutput Stamps=stamps BreakSettings="BreakSettings" />
 
 @code {
@@ -19,6 +19,8 @@
     private int censorMode = 0; //censor - 0, highlight - 1, ignore - 2
 
     public BreakSettings BreakSettings { get; set; } = new BreakSettings("60", false);
+
+    public int StackHighlightInterval { get; set; } = 45;
 
     private string inputText { get; set; } = string.Empty;
     private string outputText { get; set; } = string.Empty;
@@ -37,7 +39,7 @@
 
 
         //separating out HBDs, highlighting lines
-        stamps = stampParserService.ParseStamps(outputText);
+        stamps = stampParserService.ParseStamps(outputText, StackHighlightInterval);
 
         //profanity filter (censor mode)
         if (censorMode == 0)
@@ -65,5 +67,12 @@
     private void UpdateBreakSettings(string serializedSettings) {
         BreakSettings = JsonSerializer.Deserialize<BreakSettings>(serializedSettings) ?? new BreakSettings("60", false);
         if (BreakSettings.Enabled) ProcessTextInput();
+    }
+
+    //called whenever the stack interval textbox value is set
+    private void UpdateStackString(string stackString)
+    {
+        StackHighlightInterval = Convert.ToInt16(stackString);
+        ProcessTextInput();
     }
 }

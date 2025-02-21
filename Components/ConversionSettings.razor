@@ -2,20 +2,25 @@
 @using mintstamper.Models;
 
 <div>
-    <h5>Conversion settings</h5>
+    <h5>Conversion settings:</h5>
     <div class="container">
         <div class="form-group">
-            <label for="emoteTextbox">Emote string:</label>
+            <label for="emoteTextbox">• Emote string:</label>
             <input type="text" id="emoteTextbox" name="emoteTextbox" value="@EmoteString" @oninput="OnEmoteStringChanged" />
         </div>
         <div class="form-group">
-            <label for="censorOptionsCombobox">Content filter:</label>
+            <label for="censorOptionsCombobox">• Content filter:</label>
             <select id="censorOptionsCombobox" @onchange="OnSelectionChanged">
                 @foreach (string option in CensorOptions)
                 {
                     <option value="@option">@option</option>
                 }
             </select>
+        </div>
+        <div class="form-group">
+            <label for="stackCheckbox">• Highlight timestamps less than</label>
+            <input type="text" id="stackTextbox" name="stackTextbox" @bind="StackString" @bind:event="oninput" />
+            <label for="stackTextbox">seconds apart</label>
         </div>
         <div class="form-group">
             <input type="checkbox" name="breakCheckbox" value="@BreakBool" @onchange="OnBreakBoolChanged" />
@@ -102,6 +107,42 @@
         BreakSettings settings = new BreakSettings(string.IsNullOrEmpty(BreakString) ? "1" : BreakString, BreakBool);
         string serializedSettings = JsonSerializer.Serialize<BreakSettings>(settings);
         await BreakSettingsChangedEvent.InvokeAsync(serializedSettings);
+    }
+
+    //stack interval textbox
+    private string _stackString = "45";
+    public string? StackString
+    {
+        get => _stackString;
+        set
+        {
+            _stackString = ValidateStackString(value ?? "1");
+            _ = StackStringChanged();
+        }
+    }
+
+    private string ValidateStackString(string newLengthString)
+    {
+        foreach (char c in newLengthString)
+        {
+            if (!char.IsDigit(c))
+            {
+                newLengthString = newLengthString.Remove(newLengthString.IndexOf(c), 1);
+            }
+        }
+        if (newLengthString.Length > 3)
+        {
+            newLengthString = StackString ?? "1";
+        }
+        return newLengthString;
+    }
+
+    //here the stack highlighting interval gets passed to Home.razor
+    [Parameter]
+    public EventCallback<string> StackStringChangedEvent { get; set; }
+    private async Task StackStringChanged()
+    {
+        await StackStringChangedEvent.InvokeAsync(StackString);
     }
 
 }

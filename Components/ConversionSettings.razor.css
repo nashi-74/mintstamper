@@ -1,11 +1,13 @@
 ﻿.container {
     display: flex;
-    gap: 20px;
-    align-items: center;
+    gap: 10px;
+    align-items: flex-start;
     justify-content: flex-start;
+    flex-direction: column;
     max-width: 100%;
-    padding-left: 0px;
+    padding-left: 15px;
     margin-left: 0px;
+    font-size: 18px;
 }
 
 .form-group {
@@ -44,6 +46,11 @@ select {
 }
 
 #breakTextbox {
+    width: 50px;
+    text-align: center;
+}
+
+#stackTextbox {
     width: 50px;
     text-align: center;
 }
