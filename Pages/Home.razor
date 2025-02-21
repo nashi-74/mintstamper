@@ -8,7 +8,7 @@
 <PageTitle>Mintstamper</PageTitle>
 
 <StampInput @bind-ChildData=inputText @bind-ChildData:after=ProcessTextInput />
-<ConversionSettings EmoteString="@EmoteString" EmoteStringChangedEvent="UpdateEmoteString" BreakSettingsChangedEvent="UpdateBreakSettings" />
+<ConversionSettings EmoteString="@EmoteString" EmoteStringChangedEvent="UpdateEmoteString" CensorSettingsChangedEvent="UpdateCensorMode" BreakSettingsChangedEvent="UpdateBreakSettings" />
 <HighlightedStampOutput Stamps=stamps BreakSettings="BreakSettings" />
 
 @code {
@@ -16,261 +16,14 @@
     public string? EmoteString { get; set; } //value received from the url
     private string emoteString => string.IsNullOrEmpty(EmoteString) ? "memboo" : EmoteString; //verified and bound to the ConversionSettings textbox
 
+    private int censorMode = 0; //censor - 0, highlight - 1, ignore - 2
+
     public BreakSettings BreakSettings { get; set; } = new BreakSettings("60", false);
 
     private string inputText { get; set; } = string.Empty;
     private string outputText { get; set; } = string.Empty;
     private List<Stamp> stamps { get; set; } = [];
 
-    private List<string> replacements = new List<string>
-        {
-            //things that might get filtered, most are from this list: https://docs.google.com/spreadsheets/d/1ozg1Cnm6SdtM4M5rATkANAi07xAzYWaKL7HKxyvoHzk
-            #region profanities
-            "9-11",
-            "9/11",
-            "8chan",
-            "abortion",
-            "abortions",
-            "aids",
-            "anal",
-            "anus",
-            "arse",
-            "aryan",
-            "assed",
-            "ass",
-            "asses",
-            "assfuck",
-            "assfucked",
-            "assfucking",
-            "asshole",
-            "assholes",
-            "balls",
-            "balling",
-            "bdsm",
-            "bitch",
-            "bitchass",
-            "bitches",
-            "bitching",
-            "bitchy",
-            "blacks",
-            "blow job",
-            "blowjob",
-            "blowjobs",
-            "bondage",
-            "boned",
-            "boning",
-            "boner",
-            "boners",
-            "boob",
-            "boobies",
-            "boobs",
-            "breast",
-            "breasts",
-            "bukkake",
-            "bullshit",
-            "butt",
-            "buttfuck",
-            "buttfucked",
-            "buttfucking",
-            "butthole",
-            "buttholes",
-            "cameltoe",
-            "cameltoes",
-            "cannabis",
-            "cleavage",
-            "climax",
-            "clit",
-            "clitoris",
-            "clusterfuck",
-            "cocaine",
-            "cock",
-            "cocks",
-            "cocky",
-            "condom",
-            "condoms",
-            "coronavirus",
-            "crackhead",
-            "crackheads",
-            "cum",
-            "cumming",
-            "cums",
-            "cunt",
-            "cunts",
-            "dick",
-            "dicked",
-            "dicking",
-            "dickings",
-            "dicks",
-            "dickhead",
-            "dickheads",
-            "dildo",
-            "dildos",
-            "doggie style",
-            "doggiestyle",
-            "doggy style",
-            "doggystyle",
-            "drug",
-            "drugged",
-            "drugging",
-            "druglord",
-            "druglords",
-            "drugs",
-            "ecchi",
-            "erection",
-            "erections",
-            "erectile",
-            "facefuck",
-            "facefucked",
-            "facefucking",
-            "fascism",
-            "fascist",
-            "fascists",
-            "fellatio",
-            "fellatios",
-            "fuck",
-            "fucks",
-            "fucker",
-            "fuckers",
-            "fucking",
-            "fucks",
-            "fucked",
-            "fetish",
-            "gangbang",
-            "gang bang",
-            "gangbanged",
-            "gangbanging",
-            "gangbangs",
-            "genitalia",
-            "genitals",
-            "grope",
-            "groped",
-            "gropes",
-            "groping",
-            "guro",
-            "hentai",
-            "hitler",
-            "homophobe",
-            "homophobes",
-            "homophobic",
-            "hooker",
-            "hookers",
-            "hornier",
-            "horniest",
-            "horny",
-            "incest",
-            "jav",
-            "jerking off",
-            "jerk off",
-            "jerkoff",
-            "labia",
-            "loli",
-            "lolis",
-            "lolicon",
-            "lolicons",
-            "lsd",
-            "marijuana",
-            "masturbate",
-            "masturbating",
-            "masturbation",
-            "mating",
-            "mdma",
-            "meth",
-            "methamphetamine",
-            "methhead",
-            "methheads",
-            "motherfucker",
-            "motherfuckers",
-            "motherfucking",
-            "naked",
-            "nazi",
-            "nazis",
-            "nip",
-            "nipple",
-            "nipples",
-            "nips",
-            "nude",
-            "nudes",
-            "nudity",
-            "nutting",
-            "oral",
-            "orgasm",
-            "orgasms",
-            "orgies",
-            "orgy",
-            "pegging",
-            "peen",
-            "peens",
-            "penis",
-            "penises",
-            "porn",
-            "pornhub",
-            "porno",
-            "pussies",
-            "pussy",
-            "racism",
-            "racist",
-            "racists",
-            "rectum",
-            "red",
-            "rimjob",
-            "rimjobs",
-            "rimming",
-            "rule 34",
-            "ryona",
-            "semen",
-            "sex",
-            "sexist",
-            "sexier",
-            "sexiest",
-            "sexy",
-            "shibari",
-            "shit",
-            "shithead",
-            "shitpost",
-            "shits",
-            "shitter",
-            "shitting",
-            "shota",
-            "shotas",
-            "shotacon",
-            "shotacons",
-            "slave",
-            "slaves",
-            "slut",
-            "sluts",
-            "slutty",
-            "squirt",
-            "squirted",
-            "squirting",
-            "terrorism",
-            "terrorist",
-            "terrorists",
-            "tiktok",
-            "tiktoker",
-            "tiktoks",
-            "tit",
-            "tits",
-            "tittie",
-            "titties",
-            "titty",
-            "twerk",
-            "twerked",
-            "twerking",
-            "twerks",
-            "twerks",
-            "vagina",
-            "vaginal",
-            "vaginas",
-            "vore",
-            "vored",
-            "voring",
-            "weed",
-            "whore",
-            "whores",
-            "whoring",
-            "xxx"
-            #endregion
-        };
 
     private void ProcessTextInput()
     {
@@ -282,11 +35,20 @@
         outputText = Regex.Replace(outputText, @"w{3,}", "ww"); //trimming wwwwwws
         outputText = Regex.Replace(outputText, @"W{3,}", "WW"); //trimming WWWWWWs
 
-        //profanity filter
-        outputText = censorService.CensorText(outputText, replacements);
 
         //separating out HBDs, highlighting lines
         stamps = stampParserService.ParseStamps(outputText);
+
+        //profanity filter (censor mode)
+        if (censorMode == 0)
+        {
+            stamps = censorService.CensorText(stamps);
+        }
+        //profanity filter (highlight mode)
+        if (censorMode == 1)
+        {
+            stamps = censorService.HighlightFilteredWords(stamps);
+        }
     }
 
     //set EmoteString if no parameter received by url
@@ -294,6 +56,10 @@
 
     //called by event in ConversionSettings upon modifying the textbox content
     private void UpdateEmoteString(string newEmoteString) { EmoteString = newEmoteString; ProcessTextInput(); }
+
+    //called by event in ConversionSettings upon selecting a new censor mode
+    private void UpdateCensorMode(string newCensorMode) {
+        censorMode = Convert.ToInt16(newCensorMode); ProcessTextInput(); }
 
     //called whenever the break checkbox state is changed or a new break length value is set
     private void UpdateBreakSettings(string serializedSettings) {

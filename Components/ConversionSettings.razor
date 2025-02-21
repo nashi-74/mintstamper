@@ -5,14 +5,23 @@
     <h5>Conversion settings</h5>
     <div class="container">
         <div class="form-group">
-            <label for="textbox">Emote string:</label>
+            <label for="emoteTextbox">Emote string:</label>
             <input type="text" id="emoteTextbox" name="emoteTextbox" value="@EmoteString" @oninput="OnEmoteStringChanged" />
         </div>
         <div class="form-group">
-            <input type="checkbox" name="checkbox1" value="@BreakBool" @onchange="OnBreakBoolChanged" />
-            <label for="checkbox1">Add breaks every</label>
+            <label for="censorOptionsCombobox">Content filter:</label>
+            <select id="censorOptionsCombobox" @onchange="OnSelectionChanged">
+                @foreach (string option in CensorOptions)
+                {
+                    <option value="@option">@option</option>
+                }
+            </select>
+        </div>
+        <div class="form-group">
+            <input type="checkbox" name="breakCheckbox" value="@BreakBool" @onchange="OnBreakBoolChanged" />
+            <label for="breakCheckbox">Add breaks every</label>
             <input type="text" id="breakTextbox" name="breakTextbox" @bind="BreakString" @bind:event="oninput" />
-            <label for="checkbox1">minutes</label>
+            <label for="breakTextbox">minutes</label>
         </div>
     </div>
 </div>
@@ -30,6 +39,18 @@
     {
         EmoteString = e.Value?.ToString();
         await EmoteStringChangedEvent.InvokeAsync(EmoteString);
+    }
+
+    //censor service settings
+    public string SelectedCensorOption { get; set; } = "censor";
+    private List<string> CensorOptions = new() { "censor", "highlight", "ignore" };
+
+    [Parameter]
+    public EventCallback<string> CensorSettingsChangedEvent { get; set; }
+    private async Task OnSelectionChanged(ChangeEventArgs e)
+    {
+        SelectedCensorOption = e.Value?.ToString() ?? "";
+        await CensorSettingsChangedEvent.InvokeAsync(CensorOptions.IndexOf(SelectedCensorOption).ToString());
     }
 
     //break interval textbox

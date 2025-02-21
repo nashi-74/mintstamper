@@ -14,8 +14,13 @@
 }
 
 .highlightadjust {
-    background-color: red;
+    background-color: limegreen;
     color: black;
+}
+
+.highlightcontentfilter {
+    background-color: red;
+    color: white;
 }
 
 #copy-box {
