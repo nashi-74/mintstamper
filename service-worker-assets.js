@@ -1,5 +1,5 @@
 self.assetsManifest = {
-  "version": "ZT0EGIwQ",
+  "version": "xR2d3+9O",
   "assets": [
     {
       "hash": "sha256-M2ASTUwC/1+wb4fYSAp8Xp+KwDZlIXZ6vwzwwSWPMRI=",
@@ -122,7 +122,7 @@ self.assetsManifest = {
       "url": "_framework/System.Text.RegularExpressions.wasm"
     },
     {
-      "hash": "sha256-ZGcVUEgCSIISw3/TxebENlR1UAtfPGhNzvgSxiMD8EU=",
+      "hash": "sha256-nlcOGNvGm0vBn810IfYJdPSMy6LQ2bT0tZ0pCEWSDyY=",
       "url": "_framework/blazor.boot.json"
     },
     {
@@ -138,7 +138,7 @@ self.assetsManifest = {
       "url": "_framework/dotnet.native.js"
     },
     {
-      "hash": "sha256-4pLwNmBQNJUl7x8wfUPCIzkMvpJP915GfxnGTnHE++E=",
+      "hash": "sha256-KG7xA9EV+lOdHM1kJ9SbXTR3TpqFNBAphl76GfeddVY=",
       "url": "_framework/dotnet.native.wasm"
     },
     {
@@ -158,7 +158,7 @@ self.assetsManifest = {
       "url": "_framework/icudt_no_CJK.dat"
     },
     {
-      "hash": "sha256-H6z4ExUY9pQpycK9IM9ZwEux+rGV8dIuec4W5vYBOdM=",
+      "hash": "sha256-/80DZ9avtvSS/fxvVCGduY9yLqNVEG+IzAPIk8nd1RI=",
       "url": "_framework/mintstamper.wasm"
     },
     {
