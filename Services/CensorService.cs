@@ -90,13 +90,13 @@ public class CensorService : ICensorService
         return newStamps;
     }
 
-    private static readonly char[] separators = [' ', '.', ',', '!', '?', '-', '\'', '(', ')', '{', '}', '[', ']', '_', '+', '=', '*', '/', '\\', '<', '>', ';', '&', '%', '#', '@', '~'];
+    private static readonly char[] separators = [' ', '.', ',', '"', '\'', '!', '?', '-', '(', ')', '{', '}', '[', ']', '_', '+', '=', '*', '/', '\\', '<', '>', ':', ';', '&', '%', '#', '@', '~', '$', '^'];
 
     private static bool ContainsHashSetWord(string stampText, ref string returnedWord)
     {
         foreach (var word in stampText.Split(separators, StringSplitOptions.RemoveEmptyEntries))
         {
-            if (ContentFilterData.FilterList.Contains(word))
+            if (ContentFilterData.FilterList.Contains(word.ToLower()))
             {
                 returnedWord = word;
                 return true;
