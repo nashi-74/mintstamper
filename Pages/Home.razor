@@ -37,9 +37,6 @@
         outputText = Regex.Replace(outputText, @"w{3,}", "ww"); //trimming wwwwwws
         outputText = Regex.Replace(outputText, @"W{3,}", "WW"); //trimming WWWWWWs
 
-        outputText = Regex.Replace(outputText, @"(?<=:)\r?\n", ""); //removing spare newlines after youtube emojis
-        outputText = Regex.Replace(outputText, @"(?<=\uD83C[\uD000-\uDFFF]|\uD83D[\uD000-\uDFFF]|\uD83E[\uD000-\uDFFF])\r?\n", ""); //removing spare newlines after unicode emojis
-
 
         //separating out HBDs, highlighting lines
         stamps = stampParserService.ParseStamps(outputText, StackHighlightInterval);
